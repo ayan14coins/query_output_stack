@@ -136,5 +136,41 @@ GROUP BY
 ---
 
 ```sql
+WITH category_net AS(
+    SELECT
+        p.categoryname,
+        round((s.quantity * s.netprice * s.exchangerate)::numeric,2) as "net revenue",
+        s.orderdate,
+        EXTRACT(YEAR from s.orderdate)::numeric as year
+    FROM
+        sales s
+    LEFT JOIN
+        product p ON s.productkey = p.productkey
+    WHERE
+        EXTRACT(YEAR from s.orderdate)::numeric = 2022 or
+        EXTRACT(YEAR from s.orderdate)::numeric = 2023
+)
+
+SELECT
+    categoryname,
+    round(percentile_cont(0.5) within GROUP (ORDER BY(case when year = 2022 then "net revenue" end))::numeric,2) as "median revenue 2022",
+    round(percentile_cont(0.5) within GROUP (ORDER BY(case when year = 2023 then "net revenue" end))::numeric,2) as "median revenue 2023"
+FROM
+    category_net
+GROUP BY
+    categoryname
 
 ```
+|index|categoryname|median revenue 2022|median revenue 2023|
+|---|---|---|---|
+|0|Audio|"257\.21"|"266\.59"|
+|1|Cameras and camcorders |"651\.46"|"672\.60"|
+|2|Cell phones|"418\.60"|"375\.88"|
+|3|Computers|"809\.70"|"657\.18"|
+|4|Games and Toys|"33\.78"|"32\.62"|
+|5|Home Appliances|"791\.00"|"825\.25"|
+|6|Music, Movies and Audio Books|"186\.58"|"159\.64"|
+|7|TV and Video|"730\.46"|"790\.79"|
+
+![](4.png) *median salary as per category FY2022 & 2023*
+![](3.png) *total salary as per category FY2022 & 2023*
