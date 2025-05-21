@@ -67,5 +67,74 @@ limit
 ---
 
 ```sql
+select 
+	extract(quarter from s.orderdate) as "Quarter 2020",
+	count(distinct case when c.continent = 'Europe' then s.customerkey end) as "EU Customers",
+	count(distinct case when c.continent = 'Australia' then s.customerkey end) as "AUS Customers",
+	count(distinct case when c.continent = 'North America' then s.customerkey end) as "NA Customers"
+from
+	sales s
+left join
+	customer c on s.customerkey = c.customerkey
+where 
+	extract(year from s.orderdate) = 2020
+group by
+	extract(quarter from s.orderdate)
+
+```
+|index|Quarter 2020|EU Customers|AUS Customers|NA Customers|
+|---|---|---|---|---|
+|0|"1"|783|142|1617|
+|1|"2"|309|48|676|
+|2|"3"|169|36|407|
+|3|"4"|180|27|359|
+
+![](2.png)
+
+---
+---
+
+```sql
+WITH category_net AS(
+    SELECT
+        p.categoryname,
+        round((s.quantity * s.netprice * s.exchangerate)::numeric,2) as "net revenue",
+        s.orderdate,
+        EXTRACT(YEAR from s.orderdate)::numeric as year
+    FROM
+        sales s
+    LEFT JOIN
+        product p ON s.productkey = p.productkey
+    WHERE
+        EXTRACT(YEAR from s.orderdate)::numeric = 2022 or
+        EXTRACT(YEAR from s.orderdate)::numeric = 2023
+)
+
+SELECT
+    categoryname,
+    sum(case when year = 2022 then "net revenue" end) as "revenue 2022",
+    sum(case when year = 2023 then "net revenue" end) as "revenue 2023"
+FROM
+    category_net
+GROUP BY
+    categoryname
+```
+|index|categoryname|revenue 2022|revenue 2023|
+|---|---|---|---|
+|0|Audio|"766938\.35"|"688690\.09"|
+|1|Cameras and camcorders |"2382532\.52"|"1983546\.31"|
+|2|Cell phones|"8119664\.96"|"6002147\.18"|
+|3|Computers|"17862216\.00"|"11650867\.11"|
+|4|Games and Toys|"316127\.27"|"270374\.62"|
+|5|Home Appliances|"6612446\.19"|"5919992\.56"|
+|6|Music, Movies and Audio Books|"2989296\.87"|"2180766\.81"|
+|7|TV and Video|"5815336\.57"|"4412178\.12"|
+
+![](3.png)
+
+---
+---
+
+```sql
 
 ```
