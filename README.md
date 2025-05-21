@@ -174,3 +174,37 @@ GROUP BY
 
 ![](4.png) *median salary as per category FY2022 & 2023*
 ![](3.png) *total salary as per category FY2022 & 2023*
+
+---
+---
+
+#### "Multiple High Value Items" if quantity >= 2 and netprice >= 100
+#### "Single High Value Item" if netprice >= 100
+#### "Multiple Standard Items" if quantity >= 2
+#### "Single Standard Item" otherwise
+
+```sql
+select 
+  orderdate,
+  quantity,
+  netprice,
+  case 
+    when quantity >= 2 and netprice >= 100 then 'Multiple High Value Items'
+    when netprice >= 100 then 'Single High Value Item'
+    when quantity >= 2 then 'Multiple Standard Items'
+    else 'Single Standard Item'
+  end as "order type"
+from
+  sales
+limit 3
+```
+
+|index|orderdate|quantity|netprice|order type|
+|---|---|---|---|---|
+|0|2015-01-01|1|98\.967|Single Standard Item|
+|1|2015-01-01|1|659\.78|Single High Value Item|
+|2|2015-01-01|2|54\.376|Multiple Standard Items|
+
+---
+---
+
